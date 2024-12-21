@@ -1,9 +1,8 @@
 import cv2
 import mediapipe as mp
 import random
-from utils import count_fingers, load_question_image, play_gif
+from utils import count_fingers, load_question_image
 from questions import questions
-from PIL import Image
 
 # Inisialisasi MediaPipe Hands
 mp_hands = mp.solutions.hands
@@ -34,7 +33,6 @@ while cap.isOpened():
         x, y, w, h = position
         frame[y:y+h, x:x+w] = question_image
 
-
     # Deteksi tangan dan hitung jari yang diangkat
     if results.multi_hand_landmarks:
         for hand_landmarks in results.multi_hand_landmarks:
@@ -46,20 +44,20 @@ while cap.isOpened():
                 if fingers_count == current_question["answer"]:
                     cv2.putText(frame, "Benar!", (10, 450), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2)
                     score += 1
-                    cv2.waitKey(2000)
-                    current_question = random.choice(questions)
-                else:
-                    # Mainkan animasi GIF jika jawaban salah
-                    gif_path = current_question.get("incorrect_gif")
-                    if gif_path:
-                        play_gif(gif_path, frame, (x, y, w, h))  # Gunakan posisi pertanyaan sebagai referensi
-                    cv2.putText(frame, "Salah!", (10, 450), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 2)
-                    cv2.waitKey(2000)
-                    current_question = random.choice(questions)
+                    cv2.putText(frame, "Tekan 'N' untuk pertanyaan berikutnya", (10, 500), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (255, 255, 0), 2)
+
+                    # Menunggu pemain menekan tombol 'N' untuk melanjutkan
+                    while True:
+                        key = cv2.waitKey(1) & 0xFF
+                        if key == ord('n'):  # Tombol 'N' ditekan
+                            current_question = random.choice(questions)  # Pilih pertanyaan baru
+                            break
+                        elif key == ord('q'):  # Untuk keluar dari game jika tekan 'q'
+                            break
 
     cv2.imshow("FingerFacts: Game Kuis Pilihan Ganda", frame)
 
-    if cv2.waitKey(1) & 0xFF == ord('q'):
+    if cv2.waitKey(1) & 0xFF == ord('q'):  # Keluar game jika tekan 'q'
         break
 
 cap.release()
