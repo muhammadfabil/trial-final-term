@@ -42,9 +42,7 @@ while cap.isOpened():
 
     # Tampilkan gambar pertanyaan
     question_image, position = load_question_image(current_question["image"], frame)
-    if question_image is not None:
-        x, y, w, h = position
-        frame[y:y+h, x:x+w] = question_image
+
 
     # Tampilkan notifikasi jika jawaban benar dan menunggu user menekan 'N'
     if waiting_for_next_question:  # Hapus pengecekan waktu
