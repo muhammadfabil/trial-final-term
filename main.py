@@ -1,8 +1,9 @@
 import cv2
 import mediapipe as mp
 import random
-from utils import count_fingers, load_question_image
+from utils import count_fingers, load_question_image, play_gif
 from questions import questions
+from PIL import Image
 
 # Inisialisasi MediaPipe Hands
 mp_hands = mp.solutions.hands
@@ -28,10 +29,11 @@ while cap.isOpened():
 
     # Tampilkan gambar pertanyaan
     question_image, position = load_question_image(
-        current_question["image"], frame.shape)
+        current_question["image"], frame)
     if question_image is not None:
         x, y, w, h = position
         frame[y:y+h, x:x+w] = question_image
+
 
     # Deteksi tangan dan hitung jari yang diangkat
     if results.multi_hand_landmarks:
@@ -44,6 +46,14 @@ while cap.isOpened():
                 if fingers_count == current_question["answer"]:
                     cv2.putText(frame, "Benar!", (10, 450), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2)
                     score += 1
+                    cv2.waitKey(2000)
+                    current_question = random.choice(questions)
+                else:
+                    # Mainkan animasi GIF jika jawaban salah
+                    gif_path = current_question.get("incorrect_gif")
+                    if gif_path:
+                        play_gif(gif_path, frame, (x, y, w, h))  # Gunakan posisi pertanyaan sebagai referensi
+                    cv2.putText(frame, "Salah!", (10, 450), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 2)
                     cv2.waitKey(2000)
                     current_question = random.choice(questions)
 
